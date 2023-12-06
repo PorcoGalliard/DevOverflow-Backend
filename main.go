@@ -9,7 +9,6 @@ import (
 	"github.com/fullstack/dev-overflow/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -83,8 +82,6 @@ func main() {
 func init() {
 	_, isHeroku := os.LookupEnv("DYNO")
 	if !isHeroku {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal(err)
-		}
+		log.Println("Loading .env file failed")
 	}
 }
