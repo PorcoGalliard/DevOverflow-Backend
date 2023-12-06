@@ -1,1 +1,1 @@
-web: go build -o bin/api && ./bin/api
+web: ./bin/api
