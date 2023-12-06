@@ -164,3 +164,7 @@ func (h *UserHandler) HandleDeleteUser(c *fiber.Ctx) error {
 
 	return c.JSON(map[string]string{"message": "User berhasil dihapus dengan ID => " + clerkID})
 }
+
+func (h *UserHandler) HandleSayHello(c *fiber.Ctx) error {
+	return c.JSON(fiber.Map{"message": "Hello World"})
+}

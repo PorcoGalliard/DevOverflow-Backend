@@ -57,6 +57,7 @@ func main() {
 
 	// User Handler
 	// auth.Post("/sign-up", userHandler.HandleSignUp)
+	apiv1.Get("/", userHandler.HandleSayHello)
 	apiv1.Get("/user/:clerkID", userHandler.HandleGetUserByID)
 	auth.Post("/sign-up", userHandler.HandleCreateUser)
 	apiv1.Put("/user/:clerkID", userHandler.HandleUpdateUser)
