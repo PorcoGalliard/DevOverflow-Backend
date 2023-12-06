@@ -71,7 +71,10 @@ func main() {
 	apiv1.Put("/tag/:_id", tagHandler.HandleUpdateTag)
 	
 
-	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
+	listenAddr := os.Getenv("PORT")
+	if listenAddr == "" {
+		listenAddr = ":5000"
+	}
 	app.Listen(listenAddr)
 }
 
