@@ -82,6 +82,6 @@ func main() {
 func init() {
 	_, isHeroku := os.LookupEnv("DYNO")
 	if !isHeroku {
-		log.Println("Loading .env file")
+		log.Println("Sorry not permitted to access .env file")
 	}
 }
