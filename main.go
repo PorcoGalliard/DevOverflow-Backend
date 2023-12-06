@@ -9,6 +9,7 @@ import (
 	"github.com/fullstack/dev-overflow/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -56,7 +57,7 @@ func main() {
 
 	// User Handler
 	// auth.Post("/sign-up", userHandler.HandleSignUp)
-	apiv1.Get("/", userHandler.HandleSayHello)
+	app.Get("/", userHandler.HandleSayHello)
 	apiv1.Get("/user/:clerkID", userHandler.HandleGetUserByID)
 	auth.Post("/sign-up", userHandler.HandleCreateUser)
 	apiv1.Put("/user/:clerkID", userHandler.HandleUpdateUser)
@@ -82,6 +83,8 @@ func main() {
 func init() {
 	_, isHeroku := os.LookupEnv("DYNO")
 	if !isHeroku {
-		log.Println("Sorry not permitted to access .env file")
+		if err := godotenv.Load(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
