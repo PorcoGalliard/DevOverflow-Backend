@@ -76,12 +76,15 @@ func main() {
 		port = "5000" // Default port if not specified
 	}
 	listenAddr := ":" + port
-	
+
 	app.Listen(listenAddr)
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+	_, isHeroku := os.LookupEnv("DYNO")
+	if !isHeroku {
+		if err := godotenv.Load(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
