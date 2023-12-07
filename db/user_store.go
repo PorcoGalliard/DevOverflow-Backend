@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const USERCOLL = "users"
@@ -28,7 +29,7 @@ func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
 type UserStore interface {
 	CreateUser(context.Context, *types.User) (*types.User, error)
 	GetUserByID(context.Context, string) (*types.User, error)
-	GetUsers(context.Context) ([]*types.User, error)
+	GetUsers(context.Context, UserQueryParams) ([]*types.User, error)
 	UpdateUser(context.Context, string, *types.UpdateUserParam) error
 	DeleteUser(context.Context, string) error
 }
@@ -53,9 +54,33 @@ func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.Use
 	return &user, nil
 }
 
-func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
+func (s *MongoUserStore) GetUsers(ctx context.Context, params UserQueryParams) ([]*types.User, error) {
 	var users []*types.User
-	cursor, err := s.coll.Find(ctx, bson.M{"joinedAt": -1})
+
+	opt := options.FindOptions{}
+	opt.SetSkip((params.Page - 1) * params.Limit)
+	opt.SetLimit(params.Limit)
+
+
+	query := bson.M{}
+
+	if params.SearchQuery != "" {
+		query["$or"] = []bson.M{
+			{"firstName": bson.M{"$regex":params.SearchQuery, "$options": "i"}},
+			{"lastName": bson.M{"$regex":params.SearchQuery, "$options": "i"}},
+		}
+	}
+
+	switch params.Filter {
+	case "old_user":
+		opt.SetSort(bson.M{"joinedAt": 1})
+	case "new_user":
+		opt.SetSort(bson.M{"joinedAt": -1})
+	case "top_contributor":
+		opt.SetSort(bson.M{"reputation": -1})
+	}
+
+	cursor, err := s.coll.Find(ctx, query, &opt)
 	if err != nil {
 		return nil, err
 	}

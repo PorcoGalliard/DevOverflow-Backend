@@ -14,8 +14,6 @@ import (
 
 const QUESTIONCOLL = "questions"
 
-type Map map[string]any
-
 type Dropper interface {
 	Drop(context.Context) error
 }
