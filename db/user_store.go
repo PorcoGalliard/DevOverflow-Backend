@@ -55,7 +55,7 @@ func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.Use
 
 func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	var users []*types.User
-	cursor, err := s.coll.Find(ctx, bson.M{})
+	cursor, err := s.coll.Find(ctx, bson.M{"joinedAt": -1})
 	if err != nil {
 		return nil, err
 	}
