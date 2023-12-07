@@ -7,3 +7,12 @@ type Store struct {
 	User UserStore
 	Tag TagStore
 }
+
+type UserQueryParams struct {
+	Page int64
+	Limit int64
+	Filter string
+	SearchQuery string
+}
+
+type Map map[string]any
