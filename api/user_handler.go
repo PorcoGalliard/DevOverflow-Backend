@@ -77,6 +77,15 @@ func (h *UserHandler) HandleGetUserByID(ctx *fiber.Ctx) error {
 	return ctx.JSON(user)
 }
 
+func (h *UserHandler) HandleGetUsers(ctx *fiber.Ctx) error {
+	users, err := h.userStore.GetUsers(ctx.Context())
+	if err != nil {
+		return ErrBadRequest()
+	}
+
+	return ctx.JSON(users)
+}
+
 func (h *UserHandler) HandleCreateUser(c *fiber.Ctx) error {
 	var (
 		params types.CreateUserParam
