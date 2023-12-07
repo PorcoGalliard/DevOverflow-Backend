@@ -78,7 +78,14 @@ func (h *UserHandler) HandleGetUserByID(ctx *fiber.Ctx) error {
 }
 
 func (h *UserHandler) HandleGetUsers(ctx *fiber.Ctx) error {
-	users, err := h.userStore.GetUsers(ctx.Context())
+
+	var params db.UserQueryParams
+
+	if err := ctx.QueryParser(&params); err != nil {
+		return ErrBadRequest()
+	}
+
+	users, err := h.userStore.GetUsers(ctx.Context(), params)
 	if err != nil {
 		return ErrBadRequest()
 	}
