@@ -48,7 +48,7 @@ func main() {
 
 	app.Use(cors.New())
 	// Question Handler
-	apiv1.Get("/question/:_id", questionHandler.HandleGetQuestionByID)
+	apiv1.Get("/question/:id", questionHandler.HandleGetQuestionByID)
 	apiv1.Get("/question", questionHandler.HandleGetQuestions)
 	apiv1.Get("/question/user/:_id", questionHandler.HandleGetQuestionsByUserID)
 	apiv1.Post("/ask-question", questionHandler.HandleAskQuestion)
