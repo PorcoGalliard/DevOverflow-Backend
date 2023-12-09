@@ -74,15 +74,6 @@ func (s *MongoQuestionStore) GetQuestionByID(ctx context.Context, id string) (*t
 			"$unwind": "$user",
 		},
 		{
-			"$project": bson.M{
-				"userID": 1,
-				"clerkID": "$user.clerkID",
-				"firstName": "$user.firstName",
-				"lastName": "$user.lastName",
-				"picture": "$user.picture",
-			},
-		},
-		{
 			"$lookup": bson.M{
 				"from": "tags",
 				"localField": "tags",
