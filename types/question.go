@@ -35,6 +35,10 @@ type AskQuestionParams struct {
 	Tags []string `json:"tags"`
 }
 
+type UpdateQuestionAnswersParams struct {
+	Answers primitive.ObjectID `json:"answers"`
+}
+
 type DeleteQuestionParams struct {
 	UserID string `json:"userID"`
 }
