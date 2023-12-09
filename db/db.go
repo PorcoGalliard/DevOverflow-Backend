@@ -6,6 +6,7 @@ type Store struct {
 	Question QuestionStore
 	User UserStore
 	Tag TagStore
+	Answer AnswerStore
 }
 
 type UserQueryParams struct {
