@@ -53,22 +53,33 @@ func (s *MongoQuestionStore) Drop(ctx context.Context) error {
 func (s *MongoQuestionStore) GetQuestionByID(ctx context.Context, id string) (*types.Question, error) {
 	var question types.Question
 
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
 	pipeline := []bson.M{
+		{
+			"$match": bson.M{"_id": oid},
+		},
 		{
 			"$lookup": bson.M{
 				"from": "users",
 				"localField": "userID",
 				"foreignField": "_id",
 				"as": "user",
-			}},
-			{"$unwind":"$user"},
-			{
-				"$project": bson.M{
-					"userID": 1,
-					"clerkID": "$user.clerkID",
-					"firstName": "$user.firstName",
-					"lastName": "$user.lastName",
-					"picture": "$user.picture",
+			},
+		},
+		{
+			"$unwind": "$user",
+		},
+		{
+			"$project": bson.M{
+				"userID": 1,
+				"clerkID": "$user.clerkID",
+				"firstName": "$user.firstName",
+				"lastName": "$user.lastName",
+				"picture": "$user.picture",
 			},
 		},
 		{
@@ -76,17 +87,10 @@ func (s *MongoQuestionStore) GetQuestionByID(ctx context.Context, id string) (*t
 				"from": "tags",
 				"localField": "tags",
 				"foreignField": "_id",
-				"as": "tagDetails",
+				"as": "tagDetails",	
 			},
 		},
 	}
-
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
-	pipeline[0]["$match"] = bson.M{"_id": oid}
 
 	cursor, err := s.coll.Aggregate(ctx, pipeline)
 	if err != nil {
