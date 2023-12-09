@@ -29,7 +29,7 @@ func NewQuestionHandler(questionStore db.QuestionStore, userStore db.UserStore, 
 
 func (h *QuestionHandler) HandleGetQuestionByID(ctx *fiber.Ctx) error {
 	var (
-		id = ctx.Params("id")
+		id = ctx.Params("_id")
 	)
 	
 	question, err := h.questionStore.GetQuestionByID(ctx.Context(), id)
