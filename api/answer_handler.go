@@ -6,6 +6,7 @@ import (
 	"github.com/fullstack/dev-overflow/db"
 	"github.com/fullstack/dev-overflow/types"
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AnswerHandler struct {
@@ -33,6 +34,8 @@ func (h *AnswerHandler) HandleCreateAnswer(ctx *fiber.Ctx) error {
 		UserID: params.UserID,
 		QuestionID: params.QuestionID,
 		Content: params.Content,
+		Upvotes: []primitive.ObjectID{},
+		Downvotes: []primitive.ObjectID{},
 		CreatedAt: time.Now().UTC(),
 	}
 
