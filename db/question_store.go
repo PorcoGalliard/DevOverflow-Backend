@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -41,6 +42,7 @@ type QuestionStore interface {
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
+	UpdateQuestionAnswersField(context.Context, Map, *types.UpdateQuestionAnswersParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
 }
@@ -186,6 +188,28 @@ func (s *MongoQuestionStore) AskQuestion(ctx context.Context, question *types.Qu
 	}
 
 	return question, nil
+}
+
+func (s *MongoQuestionStore) UpdateQuestionAnswersField(ctx context.Context, filter Map, update *types.UpdateQuestionAnswersParams) error {
+	oid, ok := filter["_id"]
+	if !ok {
+		return errors.New("filter[_id] is not a primitive.ObjectID")
+	}
+
+	filter["_id"] = oid
+
+	updateDoc := bson.M{
+		"$push": bson.M{
+			"answers": bson.M{"$each":[]primitive.ObjectID{update.Answers}},
+		},
+	}
+
+	_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *MongoQuestionStore) DeleteQuestionByID(ctx context.Context, id string) error {
