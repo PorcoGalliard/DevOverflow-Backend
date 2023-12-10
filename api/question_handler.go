@@ -181,3 +181,46 @@ func (h *QuestionHandler) HandleDeleteQuestionByID(ctx *fiber.Ctx) error {
 
 	return nil
 }
+
+func (h *QuestionHandler) HandleVoteQuestion(ctx *fiber.Ctx) error {
+	var (
+		id = ctx.Params("id")
+		params types.QuestionVoteParams
+	)
+
+	if err := ctx.BodyParser(&params); err != nil {
+		return ErrBadRequest()
+	}
+
+	user, err := h.userStore.GetUserByID(ctx.Context(), params.UserID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.UserID)
+		}
+	}
+
+	question, err := h.questionStore.GetQuestionByID(ctx.Context(), id)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(id)
+		}
+	}
+
+	if question.UserID == user.ID {
+		return ErrUnauthorized()
+	}
+
+	if params.HasUpvoted {
+		if err := h.questionStore.UpvoteQuestion(ctx.Context(), id, &params); err != nil {
+			return ErrBadRequest()
+		}
+	}
+
+	if params.HasDownvoted {
+		if err := h.questionStore.DownvoteQuestion(ctx.Context(), id, &params); err != nil {
+			return ErrBadRequest()
+		}
+	}
+
+	return nil
+}
