@@ -21,3 +21,7 @@ type CreateAnswerParams struct {
 	QuestionID primitive.ObjectID `json:"questionID"`
 	Content string `json:"content"`
 }
+
+type DeleteAnswerParams struct {
+	QuestionID primitive.ObjectID `json:"questionID"`
+}
