@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/fullstack/dev-overflow/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -12,6 +13,7 @@ import (
 const ANSWERCOLL = "answers"
 
 type AnswerStore interface {
+	GetAnswersOfQuestion(context.Context, string) ([]*types.Answer, error)
 	CreateAnswer(context.Context, *types.Answer) (*types.Answer,error)
 	DeleteAnswerByID(context.Context, string) error
 }
@@ -27,6 +29,26 @@ func NewMongoAnswerStore(client *mongo.Client) *MongoAnswerStore {
 		client: client,
 		coll: client.Database(mongoenvdbname).Collection(ANSWERCOLL),
 	}
+}
+
+func (s *MongoAnswerStore) GetAnswersOfQuestion(ctx context.Context, id string) ([]*types.Answer, error) {
+	var answers []*types.Answer
+
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	cursor, err := s.coll.Find(ctx, bson.M{"questionID": oid})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cursor.All(ctx, &answers); err != nil {
+		return nil, err
+	}
+
+	return answers, nil
 }
 
 func (s *MongoAnswerStore) CreateAnswer(ctx context.Context, answer *types.Answer) ( *types.Answer, error) {
