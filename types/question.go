@@ -43,6 +43,12 @@ type DeleteQuestionParams struct {
 	UserID string `json:"userID"`
 }
 
+type QuestionVoteParams struct {
+	UserID string `json:"userID"`
+	HasUpvoted bool `json:"hasUpvoted"`
+	HasDownvoted bool `json:"hasDownvoted"`
+}
+
 func (params AskQuestionParams) Validate() map[string]string {
 	errors := map[string]string{}
 
