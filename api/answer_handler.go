@@ -33,7 +33,7 @@ func (h *AnswerHandler) HandleCreateAnswer(ctx *fiber.Ctx) error {
 	answer := &types.Answer{
 		UserID: params.UserID,
 		QuestionID: params.QuestionID,
-		Content: params.Content,
+		Description: params.Description,
 		Upvotes: []primitive.ObjectID{},
 		Downvotes: []primitive.ObjectID{},
 		CreatedAt: time.Now().UTC(),
