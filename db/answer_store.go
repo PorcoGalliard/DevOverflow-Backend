@@ -13,6 +13,7 @@ const ANSWERCOLL = "answers"
 
 type AnswerStore interface {
 	CreateAnswer(context.Context, *types.Answer) (*types.Answer,error)
+	DeleteAnswerByID(context.Context, string) error
 }
 
 type MongoAnswerStore struct {
@@ -33,8 +34,22 @@ func (s *MongoAnswerStore) CreateAnswer(ctx context.Context, answer *types.Answe
 	if err != nil {
 		return nil, err
 	}
-	
+
 	answer.ID = res.InsertedID.(primitive.ObjectID)
 
 	return answer, nil
+}
+
+func (s *MongoAnswerStore) DeleteAnswerByID(ctx context.Context, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.coll.DeleteOne(ctx, Map{"_id": oid})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
