@@ -9,6 +9,7 @@ import (
 type Answer struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	UserID primitive.ObjectID `bson:"userID" json:"userID"`
+	User *User `bson:"user,omitempty" json:"user,omitempty"`
 	QuestionID primitive.ObjectID `bson:"questionID" json:"questionID"`
 	Description string `bson:"content" json:"description"`
 	Upvotes []primitive.ObjectID `bson:"upvotes,omitempty" json:"upvotes,omitempty"`
