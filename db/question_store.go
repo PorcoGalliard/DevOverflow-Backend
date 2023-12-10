@@ -42,7 +42,7 @@ type QuestionStore interface {
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
-	UpdateQuestionAnswersField(context.Context, Map, *types.UpdateQuestionAnswersParams) error
+	// UpdateQuestionAnswersField(context.Context, Map, *types.UpdateQuestionAnswersParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
 }
