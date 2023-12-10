@@ -42,7 +42,8 @@ type QuestionStore interface {
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
-	// UpdateQuestionAnswersField(context.Context, Map, *types.UpdateQuestionAnswersParams) error
+	UpvoteQuestion(context.Context, string, *types.QuestionVoteParams) error
+	DownvoteQuestion(context.Context, string, *types.QuestionVoteParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
 }
@@ -190,6 +191,49 @@ func (s *MongoQuestionStore) AskQuestion(ctx context.Context, question *types.Qu
 	return question, nil
 }
 
+func (s *MongoQuestionStore) UpvoteQuestion(ctx context.Context, id string, params *types.QuestionVoteParams) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": oid}
+
+	updateDoc := bson.M{
+		"$pull": bson.M{"downvotes": params.UserID},
+		"$addToSet": bson.M{"upvotes": params.UserID},
+	}
+
+	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *MongoQuestionStore) DownvoteQuestion(ctx context.Context, id string, params *types.QuestionVoteParams) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": oid}
+
+	updateDoc := bson.M{
+		"$pull": bson.M{"upvotes": params.UserID},
+		"$addToSet": bson.M{"downvotes": params.UserID},
+	}
+
+	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func (s *MongoQuestionStore) UpdateQuestionAnswersField(ctx context.Context, filter Map, update *types.UpdateQuestionAnswersParams) error {
 	oid, ok := filter["_id"]
 	if !ok {
@@ -232,3 +276,74 @@ func (s *MongoQuestionStore) DeleteManyQuestionsByUserID(ctx context.Context, id
 	}
 	return nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// func (s *MongoQuestionStore) UpvoteQuestion(ctx context.Context, params *types.QuestionVoteParams) error {
+// 	oid, err := primitive.ObjectIDFromHex(params.QuestionID)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	filter := bson.M{"_id": oid}
+
+// 	if params.HasUpvoted {
+// 		updateDoc := bson.M{
+// 			"$pull": bson.M{"upvotes": params.UserID},
+// 		}
+
+// 		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	} else if params.HasDownvoted {
+// 		updateDoc := bson.M{
+// 			"$pull": bson.M{"downvotes": params.UserID},
+// 		}
+
+// 		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	if params.HasUpvoted {
+// 		updateDoc := bson.M{
+// 			"$push": bson.M{"upvotes": params.UserID},
+// 		}
+
+// 		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	} else if params.HasDownvoted {
+// 		updateDoc := bson.M{
+// 			"$push": bson.M{"downvotes": params.UserID},
+// 		}
+
+// 		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	return nil
+// }
