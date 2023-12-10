@@ -21,6 +21,20 @@ func NewAnswerHandler(answerStore db.AnswerStore, questionStore db.QuestionStore
 	}
 }
 
+func (h *AnswerHandler) HandleGetAnswersOfQuestion(ctx *fiber.Ctx) error {
+
+	var (
+		id = ctx.Params("id")
+	)
+
+	answers, err := h.answerStore.GetAnswersOfQuestion(ctx.Context(), id)
+	if err != nil {
+		return ErrBadRequest()
+	}
+
+	return ctx.JSON(answers)
+}
+
 func (h *AnswerHandler) HandleCreateAnswer(ctx *fiber.Ctx) error {
 	var (
 		params types.CreateAnswerParams
