@@ -17,13 +17,15 @@ type QuestionHandler struct {
 	questionStore db.QuestionStore
 	userStore db.UserStore
 	tagStore db.TagStore
+	answerStore db.AnswerStore
 }
 
-func NewQuestionHandler(questionStore db.QuestionStore, userStore db.UserStore, tagStore db.TagStore) *QuestionHandler {
+func NewQuestionHandler(questionStore db.QuestionStore, userStore db.UserStore, tagStore db.TagStore, answerStore db.AnswerStore) *QuestionHandler {
 	return &QuestionHandler{
 		questionStore: questionStore,
 		userStore: userStore,
 		tagStore: tagStore,
+		answerStore: answerStore,
 	}
 }
 
@@ -157,6 +159,12 @@ func (h *QuestionHandler) HandleDeleteQuestionByID(ctx *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return ErrResourceNotFound(id)
+		}
+	}
+
+	for _, answerID := range question.Answers {
+		if err := h.answerStore.DeleteAnswerByID(ctx.Context(), answerID.Hex()); err != nil {
+			return ErrBadRequest()
 		}
 	}
 
