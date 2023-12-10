@@ -39,7 +39,25 @@ func (s *MongoAnswerStore) GetAnswersOfQuestion(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	cursor, err := s.coll.Find(ctx, bson.M{"questionID": oid})
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"questionID": oid},
+		},
+		{
+			"$lookup":bson.M{
+				"from": "users",
+				"localField": "userID",
+				"foreignField": "_id",
+				"as": "user",
+			},
+		},
+		{
+			"$unwind": "$user",
+		},
+		{"$sort": bson.M{"createdAt": -1}},
+	}
+
+	cursor, err := s.coll.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
