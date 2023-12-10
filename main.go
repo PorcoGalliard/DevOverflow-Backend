@@ -77,6 +77,7 @@ func main() {
 
 	// Answer Handler
 	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
+	apiv1.Get("/question/:id/answers", answerHandler.HandleGetAnswersOfQuestion)
 
 	port := os.Getenv("PORT")
 	if port == "" {
