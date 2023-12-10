@@ -30,17 +30,20 @@ func main() {
 	var (
 		userStore = db.NewMongoUserStore(client)
 		tagStore = db.NewMongoTagStore(client)
+		answerStore = db.NewMongoAnswerStore(client)
 		questionStore = db.NewMongoQuestionStore(client, tagStore, userStore)
 
 		store = &db.Store{
 			Question: questionStore,
 			User: userStore,
 			Tag: tagStore,
+			Answer: answerStore,
 		}
 
-		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag)
+		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag, store.Answer)
 		userHandler = api.NewUserHandler(store.User, store.Tag, store.Question)
 		tagHandler = api.NewTagHandler(store.Tag, store.User)
+		answerHandler = api.NewAnswerHandler(store.Answer, store.Question)
 		app = fiber.New(config)
 		auth = app.Group("/api")
 		apiv1 = app.Group("/api/v1")
@@ -71,6 +74,9 @@ func main() {
 	apiv1.Post("/tag", tagHandler.HandleCreateTag)
 	apiv1.Put("/tag/:_id", tagHandler.HandleUpdateTag)
 	
+
+	// Answer Handler
+	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
 
 	port := os.Getenv("PORT")
 	if port == "" {
