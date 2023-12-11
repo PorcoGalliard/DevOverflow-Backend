@@ -55,7 +55,7 @@ func main() {
 	apiv1.Get("/question", questionHandler.HandleGetQuestions)
 	apiv1.Get("/question/user/:_id", questionHandler.HandleGetQuestionsByUserID)
 	apiv1.Post("/ask-question", questionHandler.HandleAskQuestion)
-	apiv1.Post("/question/:id/vote", questionHandler.HandleVoteQuestion)
+	apiv1.Post("/question/:id/vote", questionHandler.HandleQuestionVote)
 	apiv1.Delete("/question/:_id", questionHandler.HandleDeleteQuestionByID)
 	
 
