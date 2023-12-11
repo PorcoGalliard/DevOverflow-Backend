@@ -211,8 +211,16 @@ func (h *QuestionHandler) HandleQuestionVote(ctx *fiber.Ctx) error {
 		return ErrBadRequest()
 	}
 
-	if err := h.questionStore.VoteQuestion(ctx.Context(), &params); err != nil {
-		return ErrBadRequest()
+	if params.HasUpvoted {
+		if err := h.questionStore.UpvoteQuestion(ctx.Context(), &params); err != nil {
+			return ErrBadRequest()
+		}
+	}
+
+	if params.HasDownvoted {
+		if err := h.questionStore.DownvoteQuestion(ctx.Context(), &params); err != nil {
+			return ErrBadRequest()
+		}
 	}
 
 	question, err = h.questionStore.GetQuestionByID(ctx.Context(), params.QuestionID)
