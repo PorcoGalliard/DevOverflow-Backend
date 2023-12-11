@@ -43,7 +43,6 @@ type QuestionStore interface {
 	GetQuestions(context.Context) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
 	UpvoteQuestion(context.Context, *types.QuestionVoteParams) error
-	DownvoteQuestion(context.Context, *types.QuestionVoteParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
 }
@@ -197,66 +196,49 @@ func (s *MongoQuestionStore) UpvoteQuestion(ctx context.Context, params *types.Q
 		return err
 	}
 
-	filter := bson.M{"_id": user.ID}
-
-	updateDoc := bson.M{}
+	filter := bson.M{"_id": params.QuestionID}
 
 	if params.HasUpvoted {
-		updateDoc = bson.M{
+		updateDoc := bson.M{
 			"$pull": bson.M{"upvotes": user.ID},
+		}
+
+		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+		if err != nil {
+			return err
 		}
 	} else if params.HasDownvoted {
-		updateDoc = bson.M{
+		updateDoc := bson.M{
 			"$pull": bson.M{"downvotes": user.ID},
+		}
+
+		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+		if err != nil {
+			return err
+		}
+	}
+
+	if params.HasUpvoted {
+		updateDoc := bson.M{
 			"$push": bson.M{"upvotes": user.ID},
 		}
-	} else {
-		updateDoc = bson.M{
-			"$addToSet": bson.M{"upvotes": user.ID},
+
+		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+		if err != nil {
+			return err
 		}
-	}
-
-	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *MongoQuestionStore) DownvoteQuestion(ctx context.Context, params *types.QuestionVoteParams) error {
-
-	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
-	if err != nil {
-		return err
-	}
-
-	filter := bson.M{"_id": user.ID}
-
-	updateDoc := bson.M{}
-
-	if params.HasDownvoted {
-		updateDoc = bson.M{
-			"$pull": bson.M{"downvotes": user.ID},
-		}
-	} else if params.HasUpvoted {
-		updateDoc = bson.M{
-			"$pull": bson.M{"upvotes": user.ID},
+	} else if params.HasDownvoted {
+		updateDoc := bson.M{
 			"$push": bson.M{"downvotes": user.ID},
 		}
-	} else {
-		updateDoc = bson.M{
-			"$addToSet": bson.M{"downvotes": user.ID},
+
+		_, err := s.coll.UpdateOne(ctx, filter, updateDoc)
+		if err != nil {
+			return err
 		}
 	}
 
-	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
-	if err != nil {
-		return err
-	}
-
 	return nil
-
 }
 
 func (s *MongoQuestionStore) UpdateQuestionAnswersField(ctx context.Context, filter Map, update *types.UpdateQuestionAnswersParams) error {
