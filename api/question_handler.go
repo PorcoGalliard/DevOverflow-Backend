@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -182,14 +183,20 @@ func (h *QuestionHandler) HandleDeleteQuestionByID(ctx *fiber.Ctx) error {
 	return nil
 }
 
-func (h *QuestionHandler) HandleVoteQuestion(ctx *fiber.Ctx) error {
-	var (
-		id = ctx.Params("id")
-		params types.QuestionVoteParams
-	)
+func (h *QuestionHandler) HandleQuestionVote(ctx *fiber.Ctx) error {
+	var params types.QuestionVoteParams
 
 	if err := ctx.BodyParser(&params); err != nil {
+		log.Println("Params banyak salah")
+		fmt.Println("Salah di params")
 		return ErrBadRequest()
+	}
+
+	question, err := h.questionStore.GetQuestionByID(ctx.Context(), params.QuestionID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.QuestionID)
+		}
 	}
 
 	user, err := h.userStore.GetUserByID(ctx.Context(), params.UserID)
@@ -199,28 +206,34 @@ func (h *QuestionHandler) HandleVoteQuestion(ctx *fiber.Ctx) error {
 		}
 	}
 
-	question, err := h.questionStore.GetQuestionByID(ctx.Context(), id)
-	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			return ErrResourceNotFound(id)
-		}
-	}
-
 	if question.UserID == user.ID {
 		return ErrUnauthorized()
 	}
 
 	if params.HasUpvoted {
-		if err := h.questionStore.UpvoteQuestion(ctx.Context(), id, &params); err != nil {
+		if err := h.questionStore.UpvoteQuestion(ctx.Context(), &params); err != nil {
+			log.Println("Salah ketika ngevote")
+			fmt.Println("Salah di vote")
 			return ErrBadRequest()
 		}
 	}
 
 	if params.HasDownvoted {
-		if err := h.questionStore.DownvoteQuestion(ctx.Context(), id, &params); err != nil {
+		if err := h.questionStore.DownvoteQuestion(ctx.Context(), &params); err != nil {
 			return ErrBadRequest()
 		}
 	}
 
-	return nil
+	if !params.HasUpvoted && !params.HasDownvoted {
+		return ErrBadRequest()
+	}
+
+	question, err = h.questionStore.GetQuestionByID(ctx.Context(), params.QuestionID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.QuestionID)
+		}
+	}
+
+	return ctx.JSON(question)
 }
