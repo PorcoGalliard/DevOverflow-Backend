@@ -196,7 +196,12 @@ func (s *MongoQuestionStore) UpvoteQuestion(ctx context.Context, params *types.Q
 		return err
 	}
 
-	filter := bson.M{"_id": params.QuestionID}
+	question, err := s.GetQuestionByID(ctx, params.QuestionID)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": question.ID}
 
 	if params.HasUpvoted {
 		updateDoc := bson.M{
