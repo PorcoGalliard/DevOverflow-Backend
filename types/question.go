@@ -44,6 +44,7 @@ type DeleteQuestionParams struct {
 }
 
 type QuestionVoteParams struct {
+	QuestionID string `json:"questionID"`
 	UserID string `json:"userID"`
 	HasUpvoted bool `json:"hasUpvoted"`
 	HasDownvoted bool `json:"hasDownvoted"`
