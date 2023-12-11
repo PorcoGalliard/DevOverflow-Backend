@@ -211,7 +211,7 @@ func (h *QuestionHandler) HandleQuestionVote(ctx *fiber.Ctx) error {
 		return ErrBadRequest()
 	}
 
-	if err := h.questionStore.UpvoteQuestion(ctx.Context(), &params); err != nil {
+	if err := h.questionStore.VoteQuestion(ctx.Context(), &params); err != nil {
 		return ErrBadRequest()
 	}
 

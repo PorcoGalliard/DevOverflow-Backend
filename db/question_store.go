@@ -42,7 +42,7 @@ type QuestionStore interface {
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
-	UpvoteQuestion(context.Context, *types.QuestionVoteParams) error
+	VoteQuestion(context.Context, *types.QuestionVoteParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
 }
@@ -190,7 +190,7 @@ func (s *MongoQuestionStore) AskQuestion(ctx context.Context, question *types.Qu
 	return question, nil
 }
 
-func (s *MongoQuestionStore) UpvoteQuestion(ctx context.Context, params *types.QuestionVoteParams) error {
+func (s *MongoQuestionStore) VoteQuestion(ctx context.Context, params *types.QuestionVoteParams) error {
 	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return err
