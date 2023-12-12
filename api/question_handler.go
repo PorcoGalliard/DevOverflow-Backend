@@ -73,14 +73,15 @@ func (h *QuestionHandler) HandleGetQuestions(ctx *fiber.Ctx) error {
 func (h *QuestionHandler) HandleGetSavedQuestions(ctx *fiber.Ctx) error {
 	var (
 		id = ctx.Params("clerkID")
-		params types.SavedQuestionQueryParams
+		// params types.SavedQuestionQueryParams
 	)
 
-	if err := ctx.BodyParser(&params); err != nil {
-		return ErrBadRequest()
-	}
+	// if err := ctx.BodyParser(&params); err != nil {
+	// 	return ErrBadRequest()
+	// }
 
-	questions, err := h.questionStore.GetSavedQuestions(ctx.Context(), id, &params)
+	// questions, err := h.questionStore.GetSavedQuestions(ctx.Context(), id, &params)
+	questions, err := h.questionStore.GetSavedQuestions(ctx.Context(), id)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return ErrResourceNotFound(id)

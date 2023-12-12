@@ -40,7 +40,8 @@ type QuestionStore interface {
 	GetQuestionByID(context.Context, string) (*types.Question, error)
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
-	GetSavedQuestions(context.Context, string, *types.SavedQuestionQueryParams) ([]*types.Question, error)
+	// TODO: IMPLEMENT SAVED QUESTIONS PAKAI PARAMS QUERY *types.SavedQuestionQueryParams
+	GetSavedQuestions(context.Context, string) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
 	UpvoteQuestion(context.Context, *types.QuestionVoteParams) error
 	DownvoteQuestion(context.Context, *types.QuestionVoteParams) error
@@ -175,7 +176,7 @@ func (s *MongoQuestionStore) GetQuestions(ctx context.Context) ([]*types.Questio
 	return questions, nil
 }
 
-func (s *MongoQuestionStore) GetSavedQuestions(ctx context.Context, id string, params *types.SavedQuestionQueryParams) ([]*types.Question, error) {
+func (s *MongoQuestionStore) GetSavedQuestions(ctx context.Context, id string) ([]*types.Question, error) {
 	var questions []*types.Question
 	
 	user, err := s.UserStore.GetUserByID(ctx, id)
@@ -188,9 +189,9 @@ func (s *MongoQuestionStore) GetSavedQuestions(ctx context.Context, id string, p
 			{
 				"$match": bson.M{"_id": question},
 			},
-			{
-				"$match": bson.M{"title": bson.M{"$regex": primitive.Regex{Pattern: params.SearchQuery, Options: "i"}}},
-			},
+			// {
+			// 	"$match": bson.M{"title": bson.M{"$regex": primitive.Regex{Pattern: params.SearchQuery, Options: "i"}}},
+			// },
 			{
 				"$lookup": bson.M{
 					"from": "users",
@@ -227,20 +228,21 @@ func (s *MongoQuestionStore) GetSavedQuestions(ctx context.Context, id string, p
 		} 
 	}
 
-	startIndex := (params.Page - 1) * params.Limit
-	endIndex := params.Page + params.Limit
+	// startIndex := (params.Page - 1) * params.Limit
+	// endIndex := params.Page + params.Limit
 
-	if startIndex > int64(len(questions)) {
-		startIndex = int64(len(questions))
-	}
+	// if startIndex > int64(len(questions)) {
+	// 	startIndex = int64(len(questions))
+	// }
 
-	if endIndex > int64(len(questions)) {
-		endIndex = int64(len(questions))
-	}
+	// if endIndex > int64(len(questions)) {
+	// 	endIndex = int64(len(questions))
+	// }
 
-	pagedQuestions := questions[startIndex:endIndex]
+	// pagedQuestions := questions[startIndex:endIndex]
 
-	return pagedQuestions, nil
+	// return pagedQuestions, nil
+	return questions, nil
 }
 
 func (s *MongoQuestionStore) AskQuestion(ctx context.Context, question *types.Question) (*types.Question, error) {
