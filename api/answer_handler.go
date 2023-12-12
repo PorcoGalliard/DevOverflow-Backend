@@ -58,9 +58,12 @@ func (h *AnswerHandler) HandleCreateAnswer(ctx *fiber.Ctx) error {
 		return ErrBadRequest()
 	}
 
-	// if err := h.questionStore.UpdateQuestionAnswersField(ctx.Context(), db.Map{"_id":params.QuestionID}, &types.UpdateQuestionAnswersParams{Answers: answer.ID}); err != nil {
-	// 	return ErrBadRequest()
-	// }
+	if err := h.questionStore.UpdateQuestionAnswersField(ctx.Context(), &types.UpdateQuestionAnswersParams{
+		QuestionID: params.QuestionID.Hex(),
+		Answers: answer.ID,
+	}); err != nil {
+		return ErrBadRequest()
+	}
 
 	return ctx.JSON(answer)
 }
