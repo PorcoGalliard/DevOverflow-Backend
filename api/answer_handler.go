@@ -14,12 +14,14 @@ import (
 type AnswerHandler struct {
 	answerStore db.AnswerStore
 	questionStore db.QuestionStore
+	userStore db.UserStore
 }
 
-func NewAnswerHandler(answerStore db.AnswerStore, questionStore db.QuestionStore) *AnswerHandler {
+func NewAnswerHandler(answerStore db.AnswerStore, questionStore db.QuestionStore, userStore db.UserStore) *AnswerHandler {
 	return &AnswerHandler{
 		answerStore: answerStore,
 		questionStore: questionStore,
+		userStore: userStore,
 	}
 }
 
@@ -51,28 +53,10 @@ func (h *AnswerHandler) HandleGetAnswerByID(ctx *fiber.Ctx) error {
 }
 
 func (h *AnswerHandler) HandleAnswerVote(ctx *fiber.Ctx) error {
-	var (
-		params types.VoteAnswerParams
-	)
+	var params types.VoteAnswerParams
 
 	if err := ctx.BodyParser(&params); err != nil {
-		return err
-	}
-
-	if params.HasUpvoted {
-		if err := h.answerStore.UpvoteAnswer(ctx.Context(), &types.VoteAnswerParams{
-			AnswerID: params.AnswerID,
-			UserID: params.UserID,
-		}); err != nil {
-			return ErrBadRequest()
-		}
-	} else {
-		if err := h.answerStore.DownvoteAnswer(ctx.Context(), &types.VoteAnswerParams{
-			AnswerID: params.AnswerID,
-			UserID: params.UserID,
-		}); err != nil {
-			return ErrBadRequest()
-		}
+		return ErrBadRequest()
 	}
 
 	answer, err := h.answerStore.GetAnswerByID(ctx.Context(), params.AnswerID)
@@ -82,9 +66,38 @@ func (h *AnswerHandler) HandleAnswerVote(ctx *fiber.Ctx) error {
 		}
 	}
 
+	user, err := h.userStore.GetUserByID(ctx.Context(), params.UserID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.UserID)
+		}
+	}
 
+	if answer.UserID == user.ID {
+		return ErrUnauthorized()
+	}
+
+	if !params.HasUpvoted && !params.HasDownvoted {
+		return ErrBadRequest()
+	}
+
+	if params.HasUpvoted {
+		if err := h.answerStore.UpvoteAnswer(ctx.Context(), &params); err != nil {
+			return ErrBadRequest()
+		}
+	} else {
+		if err := h.answerStore.DownvoteAnswer(ctx.Context(), &params); err != nil {
+			return ErrBadRequest()
+		}
+	}
+
+	answer, err = h.answerStore.GetAnswerByID(ctx.Context(), params.AnswerID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.AnswerID)
+		}
+	}
 	return ctx.JSON(answer)
-
 }
 
 
