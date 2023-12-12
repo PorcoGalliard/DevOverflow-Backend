@@ -24,13 +24,15 @@ type AnswerStore interface {
 type MongoAnswerStore struct {
 	client *mongo.Client
 	coll *mongo.Collection
+	UserStore
 }
 
-func NewMongoAnswerStore(client *mongo.Client) *MongoAnswerStore {
+func NewMongoAnswerStore(client *mongo.Client, userStore UserStore) *MongoAnswerStore {
 	var mongoenvdbname = os.Getenv("MONGO_DB_NAME")
 	return &MongoAnswerStore{
 		client: client,
 		coll: client.Database(mongoenvdbname).Collection(ANSWERCOLL),
+		UserStore: userStore,
 	}
 }
 
@@ -104,7 +106,7 @@ func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteA
 		return err
 	}
 
-	userID, err := primitive.ObjectIDFromHex(params.UserID)
+	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
@@ -112,8 +114,8 @@ func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteA
 	filter := bson.M{"_id": answer.ID}
 
 	updateDoc := bson.M{
-		"$pull":bson.M{"downvotes": userID},
-		"$addToSet":bson.M{"upvotes": userID},
+		"$pull":bson.M{"downvotes": user.ID},
+		"$addToSet":bson.M{"upvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
@@ -130,7 +132,7 @@ func (s *MongoAnswerStore) DownvoteAnswer(ctx context.Context, params *types.Vot
 		return err
 	}
 
-	userID, err := primitive.ObjectIDFromHex(params.UserID)
+	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
@@ -138,8 +140,8 @@ func (s *MongoAnswerStore) DownvoteAnswer(ctx context.Context, params *types.Vot
 	filter := bson.M{"_id": answer.ID}
 
 	updateDoc := bson.M{
-		"$pull":bson.M{"upvotes": userID},
-		"$addToSet":bson.M{"downvotes": userID},
+		"$pull":bson.M{"upvotes": user.ID},
+		"$addToSet":bson.M{"downvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
