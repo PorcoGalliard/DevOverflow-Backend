@@ -85,7 +85,9 @@ func (h *AnswerHandler) HandleAnswerVote(ctx *fiber.Ctx) error {
 		if err := h.answerStore.UpvoteAnswer(ctx.Context(), &params); err != nil {
 			return ErrBadRequest()
 		}
-	} else {
+	}
+
+	if params.HasDownvoted {
 		if err := h.answerStore.DownvoteAnswer(ctx.Context(), &params); err != nil {
 			return ErrBadRequest()
 		}
