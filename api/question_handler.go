@@ -70,6 +70,27 @@ func (h *QuestionHandler) HandleGetQuestions(ctx *fiber.Ctx) error {
 	return ctx.JSON(questions)
 }
 
+func (h *QuestionHandler) HandleGetSavedQuestions(ctx *fiber.Ctx) error {
+	var (
+		id = ctx.Params("_id")
+		params types.SavedQuestionQueryParams
+	)
+
+	if err := ctx.BodyParser(&params); err != nil {
+		return ErrBadRequest()
+	}
+
+	questions, err := h.questionStore.GetSavedQuestions(ctx.Context(), id, &params)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(id)
+		}
+		return err
+	}
+
+	return ctx.JSON(questions)
+}
+
 func (h *QuestionHandler) HandleAskQuestion(ctx *fiber.Ctx) error {
 	var params types.AskQuestionParams
 
