@@ -50,6 +50,43 @@ func (h *AnswerHandler) HandleGetAnswerByID(ctx *fiber.Ctx) error {
 	return ctx.JSON(answer)
 }
 
+func (h *AnswerHandler) HandleAnswerVote(ctx *fiber.Ctx) error {
+	var (
+		params types.VoteAnswerParams
+	)
+
+	if err := ctx.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if params.HasUpvoted {
+		if err := h.answerStore.UpvoteAnswer(ctx.Context(), &types.VoteAnswerParams{
+			AnswerID: params.AnswerID,
+			UserID: params.UserID,
+		}); err != nil {
+			return ErrBadRequest()
+		}
+	} else {
+		if err := h.answerStore.DownvoteAnswer(ctx.Context(), &types.VoteAnswerParams{
+			AnswerID: params.AnswerID,
+			UserID: params.UserID,
+		}); err != nil {
+			return ErrBadRequest()
+		}
+	}
+
+	answer, err := h.answerStore.GetAnswerByID(ctx.Context(), params.AnswerID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(params.AnswerID)
+		}
+	}
+
+
+	return ctx.JSON(answer)
+
+}
+
 
 func (h *AnswerHandler) HandleGetAnswersOfQuestion(ctx *fiber.Ctx) error {
 
