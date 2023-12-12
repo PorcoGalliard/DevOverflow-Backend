@@ -36,6 +36,7 @@ type AskQuestionParams struct {
 }
 
 type UpdateQuestionAnswersParams struct {
+	Question string `json:"question"`
 	Answers primitive.ObjectID `json:"answers"`
 }
 
