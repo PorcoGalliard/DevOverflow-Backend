@@ -44,7 +44,7 @@ func (s *MongoAnswerStore) GetAnswerByID(ctx context.Context, id string) (*types
 		return nil, err
 	}
 
-	if err := s.coll.FindOne(ctx, Map{"_id": oid}).Decode(&answer); err != nil {
+	if err := s.coll.FindOne(ctx, bson.M{"_id":oid}).Decode(&answer); err != nil {
 		return nil, err
 	}
 
@@ -101,12 +101,12 @@ func (s *MongoAnswerStore) CreateAnswer(ctx context.Context, answer *types.Answe
 }
 
 func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteAnswerParams) error {
-	answer, err := s.GetAnswerByID(ctx, params.AnswerID)
+	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
-
-	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
+	
+	answer, err := s.GetAnswerByID(ctx, params.AnswerID)
 	if err != nil {
 		return err
 	}
@@ -114,8 +114,8 @@ func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteA
 	filter := bson.M{"_id": answer.ID}
 
 	updateDoc := bson.M{
-		"$pull":bson.M{"downvotes": user.ID},
-		"$addToSet":bson.M{"upvotes": user.ID},
+		"$pull": bson.M{"downvotes": user.ID},
+		"$addToSet": bson.M{"upvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
@@ -127,12 +127,12 @@ func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteA
 }
 
 func (s *MongoAnswerStore) DownvoteAnswer(ctx context.Context, params *types.VoteAnswerParams) error {
-	answer, err := s.GetAnswerByID(ctx, params.AnswerID)
+	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
 	if err != nil {
 		return err
 	}
-
-	user, err := s.UserStore.GetUserByID(ctx, params.UserID)
+	
+	answer, err := s.GetAnswerByID(ctx, params.AnswerID)
 	if err != nil {
 		return err
 	}
@@ -140,8 +140,8 @@ func (s *MongoAnswerStore) DownvoteAnswer(ctx context.Context, params *types.Vot
 	filter := bson.M{"_id": answer.ID}
 
 	updateDoc := bson.M{
-		"$pull":bson.M{"upvotes": user.ID},
-		"$addToSet":bson.M{"downvotes": user.ID},
+		"$pull": bson.M{"upvotes": user.ID},
+		"$addToSet": bson.M{"downvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
