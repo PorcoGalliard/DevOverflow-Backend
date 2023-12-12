@@ -142,7 +142,7 @@ func (s *MongoAnswerStore) UpvoteAnswer(ctx context.Context, params *types.VoteA
 
 	updateDoc := bson.M{
 		"$pull": bson.M{"downvotes": user.ID},
-		"$push": bson.M{"upvotes": user.ID},
+		"$addToSet": bson.M{"upvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
@@ -168,7 +168,7 @@ func (s *MongoAnswerStore) DownvoteAnswer(ctx context.Context, params *types.Vot
 
 	updateDoc := bson.M{
 		"$pull": bson.M{"upvotes": user.ID},
-		"$push": bson.M{"downvotes": user.ID},
+		"$addToSet": bson.M{"downvotes": user.ID},
 	}
 
 	_, err = s.coll.UpdateOne(ctx, filter, updateDoc)
