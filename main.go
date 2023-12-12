@@ -43,7 +43,7 @@ func main() {
 		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag, store.Answer)
 		userHandler = api.NewUserHandler(store.User, store.Tag, store.Question)
 		tagHandler = api.NewTagHandler(store.Tag, store.User)
-		answerHandler = api.NewAnswerHandler(store.Answer, store.Question)
+		answerHandler = api.NewAnswerHandler(store.Answer, store.Question, store.User)
 		app = fiber.New(config)
 		auth = app.Group("/api")
 		apiv1 = app.Group("/api/v1")
