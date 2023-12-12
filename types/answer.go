@@ -12,7 +12,7 @@ type Answer struct {
 	User *User `bson:"user,omitempty" json:"user,omitempty"`
 	QuestionID primitive.ObjectID `bson:"questionID" json:"questionID"`
 	Description string `bson:"content" json:"description"`
-	Upvotes []primitive.ObjectID `bson:"upvotes,omitempty" json:"upvotes,omitempty"`
+	Upvotes []primitive.ObjectID `bson:"upvotes" json:"upvotes"`
 	Downvotes []primitive.ObjectID `bson:"downvotes" json:"downvotes"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
