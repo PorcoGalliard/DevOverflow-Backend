@@ -30,7 +30,7 @@ func main() {
 	var (
 		userStore = db.NewMongoUserStore(client)
 		tagStore = db.NewMongoTagStore(client)
-		answerStore = db.NewMongoAnswerStore(client)
+		answerStore = db.NewMongoAnswerStore(client, userStore)
 		questionStore = db.NewMongoQuestionStore(client, tagStore, userStore)
 
 		store = &db.Store{
@@ -58,9 +58,7 @@ func main() {
 	apiv1.Post("/question/:id/vote", questionHandler.HandleQuestionVote)
 	apiv1.Delete("/question/:_id", questionHandler.HandleDeleteQuestionByID)
 	
-
 	// User Handler
-	// auth.Post("/sign-up", userHandler.HandleSignUp)
 	app.Get("/", userHandler.HandleSayHello)
 	apiv1.Get("/user/:clerkID", userHandler.HandleGetUserByID)
 	apiv1.Get("/user", userHandler.HandleGetUsers)
@@ -74,11 +72,12 @@ func main() {
 	apiv1.Get("/tag", tagHandler.HandleGetTags)
 	apiv1.Post("/tag", tagHandler.HandleCreateTag)
 	apiv1.Put("/tag/:_id", tagHandler.HandleUpdateTag)
-	
 
 	// Answer Handler
-	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
+	apiv1.Get("/question/:questionID/answer/:answerID", answerHandler.HandleGetAnswerByID)
 	apiv1.Get("/question/:id/answers", answerHandler.HandleGetAnswersOfQuestion)
+	apiv1.Post("/answer/:id/vote", answerHandler.HandleAnswerVote)
+	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
 
 	port := os.Getenv("PORT")
 	if port == "" {
