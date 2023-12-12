@@ -30,7 +30,7 @@ type UserStore interface {
 	CreateUser(context.Context, *types.User) (*types.User, error)
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context, UserQueryParams) ([]*types.User, error)
-	SaveQuestion(context.Context, *types.SaveQuestionParam) error
+	SaveQuestion(context.Context, *types.SaveQuestionParam) (bool  ,error)
 	UpdateUser(context.Context, string, *types.UpdateUserParam) error
 	DeleteUser(context.Context, string) error
 }
@@ -122,18 +122,18 @@ func (s *MongoUserStore) DeleteUser(ctx context.Context, clerkID string) error {
 	return nil
 }
 
-func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQuestionParam) error {
+func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQuestionParam) (bool, error) {
 
 	var updatedUser types.User
 
 	user, err := s.GetUserByID(ctx, params.UserID)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	paramsOID, err := primitive.ObjectIDFromHex(params.QuestionID)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	for _, questionID := range user.Saved {
@@ -141,9 +141,9 @@ func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQue
 			updateData := bson.M{"$pull": bson.M{"saved": paramsOID}}
 			result := s.coll.FindOneAndUpdate(ctx, bson.M{"clerkID": params.UserID}, updateData)
 			if err := result.Decode(&updatedUser); err != nil {
-				return err
+				return false, err
 			}
-			return nil
+			return false, nil
 		}
 	}
 
@@ -151,8 +151,8 @@ func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQue
 	updateData := bson.M{"$push": bson.M{"saved": paramsOID}}
 	result := s.coll.FindOneAndUpdate(ctx, filter, updateData)
 	if err := result.Decode(&updatedUser); err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
