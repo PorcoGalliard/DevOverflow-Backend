@@ -131,14 +131,14 @@ func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQue
 		return err
 	}
 
-	for _, questionID := range user.Saved {
+	paramsOID, err := primitive.ObjectIDFromHex(params.QuestionID)
+	if err != nil {
+		return err
+	}
 
-		paramsOID, err := primitive.ObjectIDFromHex(params.QuestionID)
-		if err != nil {
-			return err
-		}
+	for _, questionID := range user.Saved {
 		if questionID == paramsOID {
-			updateData := bson.M{"$pull": bson.M{"saved": params.QuestionID}}
+			updateData := bson.M{"$pull": bson.M{"saved": paramsOID}}
 			result := s.coll.FindOneAndUpdate(ctx, bson.M{"clerkID": params.UserID}, updateData)
 			if err := result.Decode(&updatedUser); err != nil {
 				return err
@@ -148,7 +148,7 @@ func (s *MongoUserStore) SaveQuestion(ctx context.Context, params *types.SaveQue
 	}
 
 	filter := bson.M{"clerkID": params.UserID}
-	updateData := bson.M{"$push": bson.M{"saved": params.QuestionID}}
+	updateData := bson.M{"$push": bson.M{"saved": paramsOID}}
 	result := s.coll.FindOneAndUpdate(ctx, filter, updateData)
 	if err := result.Decode(&updatedUser); err != nil {
 		return err

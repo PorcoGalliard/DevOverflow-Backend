@@ -120,6 +120,23 @@ func (h *UserHandler) HandleCreateUser(c *fiber.Ctx) error {
 	return c.JSON(insertedUser)
 }
 
+func (h *UserHandler) HandleSaveQuestion(c *fiber.Ctx) error {
+	var (
+		params types.SaveQuestionParam
+	)
+
+	if err := c.BodyParser(&params); err != nil {
+		return ErrBadRequest()
+	}
+
+	if err := h.userStore.SaveQuestion(c.Context(), &params); err != nil {
+		return ErrBadRequest()
+	}
+
+	return c.JSON(map[string]string{"message": "Question berhasil disimpan / diunsave"})
+
+}
+
 func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 	var (
 		clerkID = c.Params("clerkID")
