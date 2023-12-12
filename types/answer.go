@@ -23,6 +23,13 @@ type CreateAnswerParams struct {
 	Description string `json:"description"`
 }
 
+type VoteAnswerParams struct {
+	AnswerID string `json:"answerID"`
+	UserID string `json:"userID"`
+	HasUpvoted bool `json:"hasUpvoted"`
+	HasDownvoted bool `json:"hasDownvoted"`
+}
+
 type DeleteAnswerParams struct {
 	QuestionID primitive.ObjectID `json:"questionID"`
 }
