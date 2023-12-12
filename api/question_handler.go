@@ -72,7 +72,7 @@ func (h *QuestionHandler) HandleGetQuestions(ctx *fiber.Ctx) error {
 
 func (h *QuestionHandler) HandleGetSavedQuestions(ctx *fiber.Ctx) error {
 	var (
-		id = ctx.Params("_id")
+		id = ctx.Params("clerkID")
 		params types.SavedQuestionQueryParams
 	)
 
