@@ -47,6 +47,11 @@ type UpdateUserParam struct {
 	UpdateData map[string]interface{} `json:"updateData"`
 }
 
+type SaveQuestionParam struct {
+	QuestionID string `json:"questionID"`
+	UserID string `json:"userID"`
+}
+
 func NewUserFromParams(params CreateUserParam) (*User, error) {
 	// encpw, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
 	// if err != nil {
