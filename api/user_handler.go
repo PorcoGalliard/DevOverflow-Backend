@@ -129,12 +129,16 @@ func (h *UserHandler) HandleSaveQuestion(c *fiber.Ctx) error {
 		return ErrBadRequest()
 	}
 
-	if err := h.userStore.SaveQuestion(c.Context(), &params); err != nil {
+	saved, err := h.userStore.SaveQuestion(c.Context(), &params)
+	if err != nil {
 		return ErrBadRequest()
 	}
 
-	return c.JSON(map[string]string{"message": "Question berhasil disimpan / diunsave"})
-
+	if saved {
+		return c.JSON(fiber.Map{"message": "Question berhasil disimpan", "isSaved": true})
+	} else {
+		return c.JSON(fiber.Map{"message": "Question berhasil diunsave", "isSaved": false})
+	}
 }
 
 func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
