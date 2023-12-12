@@ -1,12 +1,14 @@
 package api
 
 import (
+	"errors"
 	"time"
 
 	"github.com/fullstack/dev-overflow/db"
 	"github.com/fullstack/dev-overflow/types"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type AnswerHandler struct {
@@ -20,6 +22,34 @@ func NewAnswerHandler(answerStore db.AnswerStore, questionStore db.QuestionStore
 		questionStore: questionStore,
 	}
 }
+
+func (h *AnswerHandler) HandleGetAnswerByID(ctx *fiber.Ctx) error {
+	var (
+		questionID = ctx.Params("questionID")
+		answerID = ctx.Params("answerID")
+	)
+
+	question, err := h.questionStore.GetQuestionByID(ctx.Context(), questionID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(questionID)
+		}
+	}
+
+	answer, err := h.answerStore.GetAnswerByID(ctx.Context(), answerID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrResourceNotFound(answerID)
+		}
+	}
+
+	if answer.QuestionID != question.ID {
+		return ErrBadRequest()
+	}
+
+	return ctx.JSON(answer)
+}
+
 
 func (h *AnswerHandler) HandleGetAnswersOfQuestion(ctx *fiber.Ctx) error {
 
