@@ -51,6 +51,12 @@ type QuestionVoteParams struct {
 	HasDownvoted bool `json:"hasDownvoted"`
 }
 
+type SavedQuestionQueryParams struct {
+	Page int64
+	Limit int64
+	SearchQuery string
+}
+
 func (params AskQuestionParams) Validate() map[string]string {
 	errors := map[string]string{}
 
