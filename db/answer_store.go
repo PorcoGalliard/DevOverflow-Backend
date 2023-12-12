@@ -44,8 +44,35 @@ func (s *MongoAnswerStore) GetAnswerByID(ctx context.Context, id string) (*types
 		return nil, err
 	}
 
-	if err := s.coll.FindOne(ctx, bson.M{"_id":oid}).Decode(&answer); err != nil {
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"_id": oid},
+		},
+		{
+			"$lookup":bson.M{
+				"from": "users",
+				"localField": "userID",
+				"foreignField": "_id",
+				"as": "user",
+			},
+		},
+		{
+			"$unwind": "$user",
+		},
+	}
+
+	cursor, err := s.coll.Aggregate(ctx, pipeline)
+	if err != nil {
 		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&answer); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, mongo.ErrNoDocuments
 	}
 
 	return &answer, nil
