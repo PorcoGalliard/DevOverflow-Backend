@@ -31,6 +31,8 @@ type UserStore interface {
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context, UserQueryParams) ([]*types.User, error)
 	SaveQuestion(context.Context, *types.SaveQuestionParam) (bool  ,error)
+	UpdateUserQuestionsField(context.Context, primitive.ObjectID, primitive.ObjectID) error
+	UpdateUserAnswersField(context.Context, primitive.ObjectID, primitive.ObjectID) error
 	UpdateUser(context.Context, string, *types.UpdateUserParam) error
 	DeleteUser(context.Context, string) error
 }
@@ -97,6 +99,42 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, clerkID string, update 
 
 	filter := bson.M{"clerkID": clerkID}
 	updateData := bson.M{"$set": update.UpdateData}
+
+	result := s.coll.FindOneAndUpdate(ctx, filter, updateData)
+
+	var updatedUser types.User
+	if err := result.Decode(&updatedUser); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *MongoUserStore) UpdateUserQuestionsField(ctx context.Context, userID primitive.ObjectID, questionID primitive.ObjectID) error {
+	filter := bson.M{"_id": userID}
+	updateData := bson.M{
+		"$push": bson.M{
+			"questions": bson.M{"$each":[]primitive.ObjectID{questionID}},
+		},
+	}
+
+	result := s.coll.FindOneAndUpdate(ctx, filter, updateData)
+
+	var updatedUser types.User
+	if err := result.Decode(&updatedUser); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *MongoUserStore) UpdateUserAnswersField(ctx context.Context, userID primitive.ObjectID, answerID primitive.ObjectID) error {
+	filter := bson.M{"_id": userID}
+	updateData := bson.M{
+		"$push": bson.M{
+			"answers": bson.M{"$each":[]primitive.ObjectID{answerID}},
+		},
+	}
 
 	result := s.coll.FindOneAndUpdate(ctx, filter, updateData)
 
