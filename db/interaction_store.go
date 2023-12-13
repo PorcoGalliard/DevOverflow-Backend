@@ -48,7 +48,11 @@ func (s *MongoInteractionStore) GetInteractionByUserAndQuestionID(ctx context.Co
 		return nil, err
 	}
 
-	if err := s.coll.FindOne(ctx, bson.M{"userID": user.ID, "questionID": question.ID}).Decode(&interaction); err != nil {
+	err = s.coll.FindOne(ctx, bson.M{"userID": user.ID, "questionID": question.ID}).Decode(&interaction); 
+	if err != nil {
+		if err == mongo.ErrNoDocuments{
+			return nil, nil
+		}
 		return nil, err
 	}
 
