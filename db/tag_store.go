@@ -31,6 +31,7 @@ type TagStore interface {
 	CreateTag(context.Context, *types.Tag) (*types.Tag, error)
 	GetTagByID(context.Context, string) (*types.Tag, error)
 	GetTagByName(context.Context, string) (*types.Tag, error)
+	GetQuestionByTagID(context.Context, string) ([]*types.Tag, error)
 	GetTags(context.Context) ([]*types.Tag, error)
 	UpdateTag(context.Context, Map, *types.UpdateTagQuestionAndFollowers) error
 	UpdateManyFollowersByID(context.Context, primitive.ObjectID) error
@@ -60,6 +61,56 @@ func (s *MongoTagStore) GetTagByName(ctx context.Context, name string) (*types.T
 	}
 
 	return &tag, nil
+}
+
+func (s *MongoTagStore) GetQuestionByTagID(ctx context.Context, id string) ([]*types.Tag, error) {
+	var tags []*types.Tag
+
+	tag, err := s.GetTagByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"_id": tag.ID},
+		},
+		{
+			"$lookup": bson.M{
+				"from": "questions",
+				"localField": "questions",
+				"foreignField": "_id",
+				"as": "questionDetails",
+			},
+		},
+		{
+			"$unwind": "$questionDetails",
+		},
+		{
+			"$lookup": bson.M{
+				"from": "users",
+				"localField": "followers",
+				"foreignField": "_id",
+				"as": "followersDetails",
+			},
+		},
+	}
+
+	cursor, err := s.collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+	if cursor.Next(ctx) {
+		var tag types.Tag
+		if err := cursor.Decode(&tag); err != nil {
+			return nil, err
+		}
+		tags = append(tags, &tag)
+	}
+
+	return tags, nil
 }
 
 func (s *MongoTagStore) GetTags(ctx context.Context) ([]*types.Tag, error) {
