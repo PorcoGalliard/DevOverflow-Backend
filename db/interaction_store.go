@@ -8,6 +8,7 @@ import (
 
 	"github.com/fullstack/dev-overflow/types"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -87,6 +88,13 @@ func (s *MongoInteractionStore) CreateViewInteraction(ctx context.Context, param
 		QuestionID: question.ID,
 		CreatedAt: time.Now().UTC(),
 	}
+
+	res, err := s.coll.InsertOne(ctx, interaction)
+	if err != nil {
+		return nil, err
+	}
+
+	interaction.ID = res.InsertedID.(primitive.ObjectID)
 
 	_ = s.questionStore.UpdateQuestionViews(ctx, params.QuestionID)
 
