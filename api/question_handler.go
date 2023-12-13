@@ -92,6 +92,19 @@ func (h *QuestionHandler) HandleGetSavedQuestions(ctx *fiber.Ctx) error {
 	return ctx.JSON(questions)
 }
 
+func (h *QuestionHandler) HandleGetQuestiosByTagID (ctx *fiber.Ctx) error {
+	var (
+		id = ctx.Params("id")
+	)
+
+	questions, err := h.questionStore.GetQuestionsByTagID(ctx.Context(), id)
+	if err != nil {
+		return ErrResourceNotFound(id)
+	}
+
+	return ctx.JSON(questions)
+}
+
 func (h *QuestionHandler) HandleAskQuestion(ctx *fiber.Ctx) error {
 	var params types.AskQuestionParams
 
