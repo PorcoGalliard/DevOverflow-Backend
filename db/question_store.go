@@ -41,6 +41,7 @@ type QuestionStore interface {
 	GetQuestionsByUserID(context.Context, string) ([]*types.Question, error)
 	GetQuestions(context.Context) ([]*types.Question, error)
 	// TODO: IMPLEMENT SAVED QUESTIONS PAKAI PARAMS QUERY *types.SavedQuestionQueryParams
+	GetQuestionsByTagID(context.Context, string) ([]*types.Question, error)
 	GetSavedQuestions(context.Context, string) ([]*types.Question, error)
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
 	UpvoteQuestion(context.Context, *types.QuestionVoteParams) error
@@ -243,6 +244,52 @@ func (s *MongoQuestionStore) GetSavedQuestions(ctx context.Context, id string) (
 	// pagedQuestions := questions[startIndex:endIndex]
 
 	// return pagedQuestions, nil
+	return questions, nil
+}
+
+func (s *MongoQuestionStore) GetQuestionsByTagID(ctx context.Context, id string) ([]*types.Question, error) {
+	var questions []*types.Question
+
+	tag, err := s.TagStore.GetTagByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline := []bson.M{
+		{"$match": bson.M{"tags": tag.ID}},
+		{
+			"$lookup": bson.M{
+				"from": "users",
+				"localField": "userID",
+				"foreignField": "_id",
+				"as": "user",
+			}},
+		{"$unwind": "$user"},
+		{"$lookup": bson.M{
+			"from": "tags",
+			"localField": "tags",
+			"foreignField": "_id",
+			"as": "tagDetails",
+		}},
+		{"$sort": bson.M{"createdAt": -1}},
+	}
+
+	cursor, err := s.coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var question types.Question
+		if err := cursor.Decode(&question); err != nil {
+			return nil, err
+		}
+
+		questions = append(questions, &question)
+	}
+
 	return questions, nil
 }
 
