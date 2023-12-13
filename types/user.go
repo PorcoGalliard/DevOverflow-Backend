@@ -28,6 +28,8 @@ type User struct {
 	EncryptedPassword string `bson:"password" json:"-"`
 	Location string `bson:"location" json:"location"`
 	PortfolioWebsite string `bson:"portfolioWebsite" json:"portfolioWebsite"`
+	Questions []primitive.ObjectID `bson:"questions" json:"questions"`
+	Answers []primitive.ObjectID `bson:"answers" json:"answers"`
 	IsAdmin bool `bson:"isAdmin" json:"isAdmin"`
 	Reputation int `bson:"reputation" json:"reputation"`
 	Saved []primitive.ObjectID `bson:"saved" json:"saved"`
@@ -65,6 +67,8 @@ func NewUserFromParams(params CreateUserParam) (*User, error) {
 		Email: params.Email,
 		Picture: params.Picture,
 		// EncryptedPassword: string(encpw),
+		Questions: []primitive.ObjectID{},
+		Answers: []primitive.ObjectID{},
 		JoinedAt: time.Now().UTC(),
 		Saved: []primitive.ObjectID{},
 	}, nil
