@@ -75,7 +75,7 @@ func main() {
 	apiv1.Get("/tag/:_id", tagHandler.HandleGetTagByID)
 	apiv1.Get("/tag/:name", tagHandler.HandleGetTagByName)
 	apiv1.Get("/tag", tagHandler.HandleGetTags)
-	apiv1.Get("/tag/:id/questions", tagHandler.HandleGetQuestionByTagID)
+	apiv1.Get("/tag/:id/questions", questionHandler.HandleGetQuestiosByTagID)
 	apiv1.Post("/tag", tagHandler.HandleCreateTag)
 	apiv1.Put("/tag/:_id", tagHandler.HandleUpdateTag)
 
