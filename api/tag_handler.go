@@ -60,6 +60,19 @@ func (h *TagHandler) HandleGetTags(ctx *fiber.Ctx) error {
 	return ctx.JSON(tags)
 }
 
+func (h *TagHandler) HandleGetQuestionByTagID(ctx *fiber.Ctx) error {
+	var (
+		id = ctx.Params("id")
+	)
+
+	questions, err := h.tagStore.GetQuestionByTagID(ctx.Context(), id)
+	if err != nil {
+		return ErrBadRequest()
+	}
+
+	return ctx.JSON(questions)
+}
+
 func (h *TagHandler) HandleCreateTag(ctx *fiber.Ctx) error {
 	var params types.CreateTagParams
 
