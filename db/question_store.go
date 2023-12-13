@@ -117,7 +117,35 @@ func (s *MongoQuestionStore) GetQuestionsByUserID(ctx context.Context, id string
 
 	oid := user.ID
 
-	cursor, err := s.coll.Find(ctx, bson.M{"userID": oid})
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"_id": oid},
+		},
+		{
+			"$lookup": bson.M{
+				"from": "users",
+				"localField": "userID",
+				"foreignField": "_id",
+				"as": "user",
+			},
+		},
+		{
+			"$unwind": "$user",
+		},
+		{
+			"$lookup": bson.M{
+				"from": "tags",
+				"localField": "tags",
+				"foreignField": "_id",
+				"as": "tagDetails",	
+			},
+		},
+		{
+			"$sort": bson.M{"upvotes": -1, "views": -1},
+		},
+	}
+
+	cursor, err := s.coll.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
