@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/fullstack/dev-overflow/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -80,6 +81,7 @@ func (s *MongoInteractionStore) CreateViewInteraction(ctx context.Context, param
 		UserID: user.ID,
 		Action: "view",
 		QuestionID: question.ID,
+		CreatedAt: time.Now().UTC(),
 	}
 
 	_ = s.questionStore.UpdateQuestionViews(ctx, params.QuestionID)
