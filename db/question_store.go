@@ -260,6 +260,8 @@ func (s *MongoQuestionStore) AskQuestion(ctx context.Context, question *types.Qu
 		}
 	}
 
+	_ = s.UserStore.UpdateUserQuestionsField(ctx, question.UserID, question.ID)
+
 	return question, nil
 }
 
