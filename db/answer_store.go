@@ -14,6 +14,7 @@ const ANSWERCOLL = "answers"
 
 type AnswerStore interface {
 	GetAnswerByID(context.Context, string) (*types.Answer, error)
+	GetAnswersByUserID(context.Context, string) ([]*types.Answer, error)
 	GetAnswersOfQuestion(context.Context, string) ([]*types.Answer, error)
 	CreateAnswer(context.Context, *types.Answer) (*types.Answer,error)
 	UpvoteAnswer(context.Context, *types.VoteAnswerParams) error
@@ -76,6 +77,60 @@ func (s *MongoAnswerStore) GetAnswerByID(ctx context.Context, id string) (*types
 	}
 
 	return &answer, nil
+}
+
+func (s *MongoAnswerStore) GetAnswersByUserID(ctx context.Context, id string) ([]*types.Answer, error) {
+	user, err := s.UserStore.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	oid := user.ID
+
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{"userID": oid},
+		},
+		{
+			"$lookup":bson.M{
+				"from": "users",
+				"localField": "userID",
+				"foreignField": "_id",
+				"as": "user",
+			},
+		},
+		{
+			"lookup": bson.M{
+				"from": "questions",
+				"localField": "questionID",
+				"foreignField": "_id",
+				"as": "questionDetails",
+			},
+		},
+		{
+			"$sort": bson.M{"upvotes": -1},
+		},
+	}
+
+	cursor, err := s.coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+	var answers []*types.Answer
+
+	for cursor.Next(ctx) {
+		var answer types.Answer
+		if err := cursor.Decode(&answer); err != nil {
+			return nil, err
+		}
+		answers = append(answers, &answer)
+	
+	}
+
+	return answers, nil
+
 }
 
 func (s *MongoAnswerStore) GetAnswersOfQuestion(ctx context.Context, id string) ([]*types.Answer, error) {
