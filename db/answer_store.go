@@ -124,6 +124,8 @@ func (s *MongoAnswerStore) CreateAnswer(ctx context.Context, answer *types.Answe
 
 	answer.ID = res.InsertedID.(primitive.ObjectID)
 
+	_ = s.UserStore.UpdateUserAnswersField(ctx, answer.UserID, answer.ID)
+
 	return answer, nil
 }
 
