@@ -45,6 +45,7 @@ type QuestionStore interface {
 	AskQuestion(context.Context, *types.Question) (*types.Question, error)
 	UpvoteQuestion(context.Context, *types.QuestionVoteParams) error
 	DownvoteQuestion(context.Context, *types.QuestionVoteParams) error
+	UpdateQuestionViews(context.Context, string) error
 	UpdateQuestionAnswersField(context.Context, *types.UpdateQuestionAnswersParams) error
 	DeleteQuestionByID(context.Context, string) error
 	DeleteManyQuestionsByUserID(context.Context, primitive.ObjectID) error
@@ -310,6 +311,20 @@ func (s *MongoQuestionStore) DownvoteQuestion(ctx context.Context, params *types
 	if err != nil {
 		return err
 	}
+
+	return nil
+
+}
+
+func (s *MongoQuestionStore) UpdateQuestionViews(ctx context.Context, id string) error {
+	question, err := s.GetQuestionByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": question.ID}
+
+	_ = s.coll.FindOneAndUpdate(ctx, filter, bson.M{"$inc": bson.M{"views": 1}})
 
 	return nil
 
