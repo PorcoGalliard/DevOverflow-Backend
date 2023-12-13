@@ -11,6 +11,7 @@ type Answer struct {
 	UserID primitive.ObjectID `bson:"userID" json:"userID"`
 	User *User `bson:"user,omitempty" json:"user,omitempty"`
 	QuestionID primitive.ObjectID `bson:"questionID" json:"questionID"`
+	QuestionDetails *Question `bson:"questionDetails,omitempty" json:"questionDetails,omitempty"`
 	Description string `bson:"content" json:"description"`
 	Upvotes []primitive.ObjectID `bson:"upvotes" json:"upvotes"`
 	Downvotes []primitive.ObjectID `bson:"downvotes" json:"downvotes"`
