@@ -1,6 +1,10 @@
 package types
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Interaction struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
@@ -9,7 +13,7 @@ type Interaction struct {
 	QuestionID primitive.ObjectID `bson:"questionID" json:"questionID"`
 	AnswerID primitive.ObjectID `bson:"answerID" json:"answerID"`
 	Tags []primitive.ObjectID `bson:"tags" json:"tags"`
-	CreatedAt int64 `bson:"createdAt" json:"createdAt"`
+	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
 
 type ViewQuestionParams struct {
