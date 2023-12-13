@@ -56,7 +56,7 @@ func main() {
 	// Question Handler
 	apiv1.Get("/question/:id", questionHandler.HandleGetQuestionByID)
 	apiv1.Get("/question", questionHandler.HandleGetQuestions)
-	apiv1.Get("/question/user/:_id", questionHandler.HandleGetQuestionsByUserID)
+	apiv1.Get("/question/user/:id", questionHandler.HandleGetQuestionsByUserID)
 	apiv1.Post("/ask-question", questionHandler.HandleAskQuestion)
 	apiv1.Post("/question/:id/vote", questionHandler.HandleQuestionVote)
 	apiv1.Delete("/question/:_id", questionHandler.HandleDeleteQuestionByID)
@@ -82,6 +82,7 @@ func main() {
 	// Answer Handler
 	apiv1.Get("/question/:questionID/answer/:answerID", answerHandler.HandleGetAnswerByID)
 	apiv1.Get("/question/:id/answers", answerHandler.HandleGetAnswersOfQuestion)
+	apiv1.Get("/answer/user/:id", answerHandler.HandleGetAnswersByUserID)
 	apiv1.Post("/answer/:id/vote", answerHandler.HandleAnswerVote)
 	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
 
