@@ -17,6 +17,6 @@ type Interaction struct {
 }
 
 type ViewQuestionParams struct {
-	UserID string `json:"userID,omitempty"`
+	UserID string `json:"userID"`
 	QuestionID string `json:"questionID"`
 }
