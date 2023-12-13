@@ -32,18 +32,21 @@ func main() {
 		tagStore = db.NewMongoTagStore(client)
 		answerStore = db.NewMongoAnswerStore(client, userStore)
 		questionStore = db.NewMongoQuestionStore(client, tagStore, userStore)
+		interactionStore = db.NewMongoInteractionStore(client, userStore, questionStore)
 
 		store = &db.Store{
 			Question: questionStore,
 			User: userStore,
 			Tag: tagStore,
 			Answer: answerStore,
+			Interaction: interactionStore,
 		}
 
 		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag, store.Answer)
 		userHandler = api.NewUserHandler(store.User, store.Tag, store.Question)
 		tagHandler = api.NewTagHandler(store.Tag, store.User)
 		answerHandler = api.NewAnswerHandler(store.Answer, store.Question, store.User)
+		interactionHandler = api.NewInteractionHandler(store.Interaction)
 		app = fiber.New(config)
 		auth = app.Group("/api")
 		apiv1 = app.Group("/api/v1")
@@ -80,6 +83,9 @@ func main() {
 	apiv1.Get("/question/:id/answers", answerHandler.HandleGetAnswersOfQuestion)
 	apiv1.Post("/answer/:id/vote", answerHandler.HandleAnswerVote)
 	apiv1.Post("/answer-question", answerHandler.HandleCreateAnswer)
+
+	// Interaction Handler
+	apiv1.Post("/question/view", interactionHandler.HandleCreateViewInteraction)
 
 	port := os.Getenv("PORT")
 	if port == "" {
