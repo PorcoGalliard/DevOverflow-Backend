@@ -11,7 +11,9 @@ type Tag struct {
 	Description string `bson:"description" json:"description"`
 	Name string `bson:"name" json:"name"`
 	Questions []primitive.ObjectID `bson:"questions" json:"questions"`
+	QuestionDetails []*Question `bson:"questionDetails,omitempty" json:"questionDetails,omitempty"`
 	Followers []primitive.ObjectID `bson:"followers" json:"followers"`
+	FollowersDetails []*User `bson:"followersDetails,omitempty" json:"followersDetails,omitempty"`
 	CreatedAt time.Time `bson:"createdAt" json:"createdAt"`
 }
 
