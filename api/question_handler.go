@@ -47,7 +47,7 @@ func (h *QuestionHandler) HandleGetQuestionByID(ctx *fiber.Ctx) error {
 
 func (h *QuestionHandler) HandleGetQuestionsByUserID(ctx *fiber.Ctx) error {
 	var (
-		id = ctx.Params("_id")
+		id = ctx.Params("id")
 	)
 
 	questions, err := h.questionStore.GetQuestionsByUserID(ctx.Context(), id)

@@ -102,6 +102,19 @@ func (h *AnswerHandler) HandleAnswerVote(ctx *fiber.Ctx) error {
 	return ctx.JSON(answer)
 }
 
+func (h *AnswerHandler) HandleGetAnswersByUserID(ctx *fiber.Ctx) error {
+	var (
+		id = ctx.Params("id")
+	)
+
+	answers, err := h.answerStore.GetAnswersByUserID(ctx.Context(), id)
+	if err != nil {
+		return ErrBadRequest()
+	}
+
+	return ctx.JSON(answers)
+}
+
 
 func (h *AnswerHandler) HandleGetAnswersOfQuestion(ctx *fiber.Ctx) error {
 
