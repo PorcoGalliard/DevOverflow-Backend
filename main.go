@@ -42,6 +42,7 @@ func main() {
 			Interaction: interactionStore,
 		}
 
+		openAIHandler = api.NewOpenAIHandler()
 		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag, store.Answer)
 		userHandler = api.NewUserHandler(store.User, store.Tag, store.Question)
 		tagHandler = api.NewTagHandler(store.Tag, store.User)
@@ -88,6 +89,9 @@ func main() {
 
 	// Interaction Handler
 	apiv1.Post("/question/view", interactionHandler.HandleCreateViewInteraction)
+
+	// OpenAI Handler
+	apiv1.Post("/chat-gpt", openAIHandler.HandleChatGPT)
 
 	port := os.Getenv("PORT")
 	if port == "" {

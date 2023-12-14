@@ -6,6 +6,7 @@ require (
 	github.com/clerkinc/clerk-sdk-go v1.48.4
 	github.com/gofiber/fiber/v2 v2.51.0
 	github.com/joho/godotenv v1.5.1
+	github.com/sashabaranov/go-openai v1.17.9
 	go.mongodb.org/mongo-driver v1.13.0
 	golang.org/x/crypto v0.7.0
 	golang.org/x/text v0.8.0
