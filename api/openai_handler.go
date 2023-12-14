@@ -1,8 +1,6 @@
 package api
 
 import (
-	"os"
-
 	"github.com/gofiber/fiber/v2"
 	openai "github.com/sashabaranov/go-openai"
 )
@@ -11,9 +9,9 @@ type OpenAIHandler struct {
 	Client *openai.Client
 }
 
-func NewOpenAIHandler() *OpenAIHandler {
+func NewOpenAIHandler(client *openai.Client) *OpenAIHandler {
 	return &OpenAIHandler{
-		Client: openai.NewClient(os.Getenv("OPENAI_API_KEY")),
+		Client: client,
 	}
 }
 

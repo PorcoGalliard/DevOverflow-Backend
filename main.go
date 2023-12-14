@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
+	"github.com/sashabaranov/go-openai"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,10 +23,12 @@ var (
 
 func main() {
 	mongoEndpoint := os.Getenv("MONGO_DB_URL")
+	openAIAPIKey := os.Getenv("OPENAI_API_KEY")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoEndpoint))
 	if err != nil {
 		log.Fatal(err)
 	} 
+	openAIClient := openai.NewClient(openAIAPIKey)
 
 	var (
 		userStore = db.NewMongoUserStore(client)
@@ -42,7 +45,7 @@ func main() {
 			Interaction: interactionStore,
 		}
 
-		openAIHandler = api.NewOpenAIHandler()
+		openAIHandler = api.NewOpenAIHandler(openAIClient)
 		questionHandler = api.NewQuestionHandler(store.Question, store.User, store.Tag, store.Answer)
 		userHandler = api.NewUserHandler(store.User, store.Tag, store.Question)
 		tagHandler = api.NewTagHandler(store.Tag, store.User)
