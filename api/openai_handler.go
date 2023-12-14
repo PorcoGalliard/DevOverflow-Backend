@@ -23,7 +23,7 @@ func (h *OpenAIHandler) HandleChatGPT(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	question, ok := reqBody["question"]
+	question, ok := reqBody["description"]
 	if !ok {
 		return fiber.NewError(fiber.StatusBadRequest, "missing question")
 	}
